@@ -18,6 +18,11 @@ body {
   background-color: #ccc;
 }
 
+.done {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
 .wrapper {
   width: 80%;
   margin: 1rem auto;

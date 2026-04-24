@@ -1,13 +1,15 @@
-const ArticleList = ({ articles }) => {
+const ArticleList = ({ contents }) => {
   return (
     <tbody>
-      {articles.map((board) => (
-        <tr>
-          <td>{board.id}</td>
-          <td>{board.subject}</td>
-          <td>{board.email}</td>
-          <td>{board.viewCnt}</td>
-          <td>{board.crtDt}</td>
+      {contents.map((article) => (
+        <tr key={article.id}>
+          <td>{article.id}</td>
+          <td>{article.subject}</td>
+          <td>
+            {article.membersVO.name}({article.membersVO.email})
+          </td>
+          <td>{article.viewCnt}</td>
+          <td>{article.crtDt}</td>
         </tr>
       ))}
     </tbody>

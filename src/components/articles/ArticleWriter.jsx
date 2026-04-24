@@ -62,19 +62,11 @@ export default ArticleWriter; /*
 
 /** @format */
 
-const Input = ({
-  id,
-  title,
-  type = "text",
-  // value, onChange가 전달되지 않을 때를 대비해
-  // "", 빈 함수로 대체가능하게 해줌,(default parameter)
-  value = "",
-  onChange = () => {},
-}) => {
+const Input = ({ id, title, type = "text", ...props }) => {
   return (
     <div className="input-field">
       <label htmlFor={id}>{title}</label>
-      <input type={type} id={id} value={value} onChange={onChange} />
+      <input type={type} id={id} {...props} />
     </div>
   );
 };

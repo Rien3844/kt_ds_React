@@ -90,33 +90,44 @@ const ArticleWriter = ({
   onResetClick,
 }) => {
   return (
-    <div className="article-writer">
-      <Input
-        id="subject"
-        title="제목"
-        value={subject}
-        onChange={onSubjectChange}
-      />
-      <Input id="name" title="이름" value={name} onChange={onNameChange} />
-      <Input id="email" title="이메일" value={email} onChange={onEmailChange} />
-      <Textarea
-        id="content"
-        title="내용"
-        value={content}
-        onChange={onContentChange}
-      />
+    <>
+      <div className="article-writer">
+        <Input
+          id="subject"
+          title="제목"
+          value={subject}
+          onChange={onSubjectChange}
+        />
+        <Input id="name" title="이름" value={name} onChange={onNameChange} />
+        <Input
+          id="email"
+          title="이메일"
+          value={email}
+          onChange={onEmailChange}
+        />
+        <Textarea
+          id="content"
+          title="내용"
+          value={content}
+          onChange={onContentChange}
+        />
 
-      <button
-        type="button"
-        className="positive-button"
-        onClick={onAddArticleClick}
-      >
-        저장
-      </button>
-      <button type="button" className="negative-button" onClick={onResetClick}>
-        취소
-      </button>
-    </div>
+        <button
+          type="button"
+          className="positive-button"
+          onClick={onAddArticleClick}
+        >
+          저장
+        </button>
+        <button
+          type="button"
+          className="negative-button"
+          onClick={onResetClick}
+        >
+          취소
+        </button>
+      </div>
+    </>
   );
 };
 export default ArticleWriter;

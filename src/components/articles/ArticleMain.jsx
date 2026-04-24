@@ -94,6 +94,8 @@ const ArticleMain = () => {
   console.log(articleData);
 
   const [articles, setArticles] = useState(articleData.articles);
+  // 글쓰기 화면을 보여줄 State 생성
+  const [showWrite, setShowWrite] = useState(false);
 
   const [
     {
@@ -137,6 +139,8 @@ const ArticleMain = () => {
       content: "",
       membersVO: { email: "", name: "" },
     });
+    // 기존 ResetHandler에 취소 버튼을 누를 시 글쓰기 Form이 닫힐 수 있게 showWrite값 변경
+    setShowWrite(false);
   };
 
   const onAddArticleClickHandler = () => {
@@ -182,6 +186,10 @@ const ArticleMain = () => {
     onResetClickHandler();
   };
 
+  const onShowWriteFormHandler = () => {
+    setShowWrite(true);
+  };
+
   return (
     <div className="wrapper">
       <div>{articles.length}개의 게시글이 검색되었습니다.</div>
@@ -189,15 +197,25 @@ const ArticleMain = () => {
         <ArticleHeader />
         <ArticleList contents={articles} />
       </table>
-      <ArticleWriter
-        inputData={{ subject, content, email, name }}
-        onSubjectChange={onSubjectChangeHandler}
-        onContentChange={onContentChangeHandler}
-        onEmailChange={onEmailChangeHandler}
-        onNameChange={onNameChangeHandler}
-        onAddArticleClick={onAddArticleClickHandler}
-        onResetClick={onResetClickHandler}
-      />
+
+      {!showWrite && (
+        <button className="write-button" onClick={onShowWriteFormHandler}>
+          글쓰기
+        </button>
+      )}
+
+      {showWrite && (
+        <ArticleWriter
+          inputData={{ subject, content, email, name }}
+          showWriteForm={showWrite}
+          onSubjectChange={onSubjectChangeHandler}
+          onContentChange={onContentChangeHandler}
+          onEmailChange={onEmailChangeHandler}
+          onNameChange={onNameChangeHandler}
+          onAddArticleClick={onAddArticleClickHandler}
+          onResetClick={onResetClickHandler}
+        />
+      )}
     </div>
   );
 };

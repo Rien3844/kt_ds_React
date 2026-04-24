@@ -53,49 +53,63 @@ const TodoMain = () => {
   ];
 
   const [cachedData, setCachedData] = useState(todoDatas);
+  const [{ todo, dueDate, priority }, setNewTodoData] = useState({
+    todo: "",
+    dueDate: "",
+    priority: 0,
+  });
+
+  const onAllDoneChangeHandler = (isDone) => {
+    setCachedData((prevData) => {
+      // cachedData를 반복하면서 모든 isDone의 값을 변경한다.
+      const newData = prevData.map((todo) => ({ ...todo, isDone }));
+      //변경된 결과를 반환한다.
+      return newData;
+    });
+  };
 
   // 특정 todo의 isDone 값을 반전시키는 함수.
   // 이 함수를 TodoList에게 props로 전달.
   // TodoList는 TodoItem에게 props로 전달.
-  const onDoneChangeHandler = (todoId) => {
+  const onDoneChangeHandler = (todoId, isDone) => {
     // 일반적인 값을 넣을 수도 있지만, 함수도 넣을 수 있음.
     // 왜 함수를 쓰는가? = parameter에 변경 이전 데이터(cachedData)를 넣어줄 예정.
-    setCachedData((prevData) => {
-      // TODO : [...prevData]에 대해서
-      const newStateMemory = [...prevData];
-
-      // java for each 와 같은 형태의 문법
-      for (const todo of newStateMemory) {
-        if (todo.id === todoId) {
-          // TODO : !todo.isDone => true로 바꾼이유
-          todo.isDone = true;
-          break;
-        }
-      }
-      // cashedData를 가져와 값을 바꿧으니, cachedData를 바뀐 값으로 바꿔줘라. ==> return prevData;
-      // 안바뀌는 이유? : cachedData를 바꿔 메모리안 데이터는 바뀌었지만 메모리 주소(배열)는 바뀌지 않았다.
-      // ==> React는 메모리 주소(배열)가 바뀌지않으면 바꾸지 않았다고 판단한다. = 메모리 주소(배열)를 바꿔줘야함.
-      // [...prevData] = 데이터를 새로운 메모리 주소(배열)를 만들어 다른 메모리 주소(배열)로 넣어준다.
-      return newStateMemory;
-    });
-
-    console.log(todoId, todoDatas);
+    setCachedData((prevData) =>
+      prevData.map((todo) =>
+        todo.id === todoId ? { ...todo, isDone: !todo.isDone } : todo,
+      ),
+    );
+    console.log(isDone);
   };
 
   const onTaskKeyUpHandler = (event) => {
     console.log(event.target.value);
+    setNewTodoData((prevData) => ({ ...prevData, todo: event.target.value }));
   };
 
   const onDateChangeHandler = (event) => {
     console.log(event.target.value);
+    setNewTodoData((prevData) => ({
+      ...prevData,
+      dueDate: event.target.value,
+    }));
   };
 
   const onSaveButtonClickHandler = () => {
     console.log("저장합니다.");
+    setCachedData((prevData) => [
+      ...prevData,
+      { id: prevData.length + 1, todo, dueDate, priority, isDone: false },
+    ]);
+    setNewTodoData({ todo: "", dueDate: "", priority: 0 });
   };
 
   const onPrioritySelectChangeHandler = (event) => {
     console.log(event.target.value);
+    setNewTodoData((prevData) => ({
+      ...prevData,
+      priority: parseInt(event.target.value),
+    }));
   };
 
   // 컴포넌트가 만들어줄 HTML Tag set을 반환.
@@ -106,10 +120,11 @@ const TodoMain = () => {
       </div>
       <header>React Todo</header>
       <ul className="tasks">
-        <TodoHeader />
+        <TodoHeader onAllDoneChange={onAllDoneChangeHandler} />
         <TodoList todoDatas={cachedData} onDoneChange={onDoneChangeHandler} />
       </ul>
       <TodoAppender
+        inputData={{ todo, dueDate, priority }}
         onTaskKeyUp={onTaskKeyUpHandler}
         onDateChange={onDateChangeHandler}
         onSaveButtonClick={onSaveButtonClickHandler}

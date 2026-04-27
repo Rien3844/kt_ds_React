@@ -61,7 +61,7 @@ const ArticleMain = () => {
         <ArticleHeader />
         <ArticleList contents={articles} />
       </table>
-      <ArticleWriter2 onAddArticleClick={onAddArticleClickHandler} />
+      <ArticleWriter onAddArticleClick={onAddArticleClickHandler} />
     </div>
   );
 };

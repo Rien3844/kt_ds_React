@@ -1,11 +1,27 @@
 import { useRef } from "react";
+import { Alert } from "../ui/Modal";
 
 const TodoAppender = ({ onSaveButtonClick }) => {
+  const todoAlertRef = useRef();
+
   const taskRef = useRef();
   const dueDateRef = useRef();
   const priorityRef = useRef();
 
   const onSaveButtonClickHandler = () => {
+    if (!taskRef.current.value) {
+      todoAlertRef.current.showModal("내용을 입력하세요.");
+      return;
+    }
+    if (!dueDateRef.current.value) {
+      todoAlertRef.current.showModal("날짜를 입력하세요.");
+      return;
+    }
+    if (!priorityRef.current.value) {
+      todoAlertRef.current.showModal("우선순위를 입력하세요.");
+      return;
+    }
+
     onSaveButtonClick(
       taskRef.current.value,
       dueDateRef.current.value,
@@ -19,6 +35,7 @@ const TodoAppender = ({ onSaveButtonClick }) => {
 
   return (
     <footer>
+      <Alert dialogRef={todoAlertRef} />
       <input type="text" placeholder="Input new task" ref={taskRef} />
       <input type="date" ref={dueDateRef} />
       <select ref={priorityRef}>

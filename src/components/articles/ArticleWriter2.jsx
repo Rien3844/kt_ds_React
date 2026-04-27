@@ -2,38 +2,22 @@
 
 import { useRef, useState } from "react";
 
-const Input = ({ id, title, type = "text", ref, ...props }) => {
-  console.log("Input");
-  return (
-    <div className="input-field">
-      <label htmlFor={id}>{title}</label>
-      <input type={type} id={id} ref={ref} {...props} />
-    </div>
-  );
-};
-
-const Textarea = ({ id, title, ref, ...props }) => {
-  console.log("Textarea");
-  return (
-    <div className="input-field">
-      <label htmlFor={id}>{title}</label>
-      <textarea id={id} ref={ref} {...props}></textarea>
-    </div>
-  );
-};
-
-const ArticleWriter = ({ onAddArticleClick }) => {
-  console.log("ArticleWriter");
-
-  const [viewMode, setViewMode] = useState("button");
+const ArticleWriter2 = ({ onAddArticleClick }) => {
+  console.log("ArticleWriter2");
 
   const subjectRef = useRef();
   const nameRef = useRef();
   const emailRef = useRef();
   const contentRef = useRef();
 
+  const [viewMode, setViewMode] = useState("button");
+
   // 저장을 클릭하면 입력했던 값을 가져와 출력한다.
   const onSaveButtonClickHandler = () => {
+    console.log("subjectRef", subjectRef.current.value);
+    console.log("nameRef", nameRef.current.value);
+    console.log("emailRef", emailRef.current.value);
+    console.log("contentRef", contentRef.current.value);
     onAddArticleClick(
       subjectRef.current.value,
       nameRef.current.value,
@@ -49,6 +33,8 @@ const ArticleWriter = ({ onAddArticleClick }) => {
 
   const onViewChangeButtonClickHandler = (viewName) => {
     setViewMode(viewName);
+    if (viewName === "button") {
+    }
   };
 
   return (
@@ -63,10 +49,25 @@ const ArticleWriter = ({ onAddArticleClick }) => {
       )}
       {viewMode === "form" && (
         <>
-          <Input id="subject" title="제목" ref={subjectRef} />
-          <Input id="name" title="이름" ref={nameRef} />
-          <Input id="email" title="이메일" ref={emailRef} />
-          <Textarea id="content" title="내용" ref={contentRef} />
+          <div className="input-field">
+            <label htmlFor="subject">제목</label>
+            <input type="text" id="subject" ref={subjectRef} />
+          </div>
+
+          <div className="input-field">
+            <label htmlFor="name">이름</label>
+            <input type="text" id="name" ref={nameRef} />
+          </div>
+
+          <div className="input-field">
+            <label htmlFor="email">이메일</label>
+            <input type="text" id="email" ref={emailRef} />
+          </div>
+
+          <div className="input-field">
+            <label htmlFor="content">내용</label>
+            <textarea id="content" ref={contentRef}></textarea>
+          </div>
 
           <button
             type="button"
@@ -87,4 +88,4 @@ const ArticleWriter = ({ onAddArticleClick }) => {
     </div>
   );
 };
-export default ArticleWriter;
+export default ArticleWriter2;

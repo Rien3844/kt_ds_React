@@ -53,11 +53,6 @@ const TodoMain = () => {
   ];
 
   const [cachedData, setCachedData] = useState(todoDatas);
-  const [{ todo, dueDate, priority }, setNewTodoData] = useState({
-    todo: "",
-    dueDate: "",
-    priority: 0,
-  });
 
   const onAllDoneChangeHandler = (isDone) => {
     setCachedData((prevData) => {
@@ -82,34 +77,12 @@ const TodoMain = () => {
     console.log(isDone);
   };
 
-  const onTaskKeyUpHandler = (event) => {
-    console.log(event.target.value);
-    setNewTodoData((prevData) => ({ ...prevData, todo: event.target.value }));
-  };
-
-  const onDateChangeHandler = (event) => {
-    console.log(event.target.value);
-    setNewTodoData((prevData) => ({
-      ...prevData,
-      dueDate: event.target.value,
-    }));
-  };
-
-  const onSaveButtonClickHandler = () => {
+  const onSaveButtonClickHandler = (todo, dueDate, priority) => {
     console.log("저장합니다.");
     setCachedData((prevData) => [
       ...prevData,
       { id: prevData.length + 1, todo, dueDate, priority, isDone: false },
     ]);
-    setNewTodoData({ todo: "", dueDate: "", priority: 0 });
-  };
-
-  const onPrioritySelectChangeHandler = (event) => {
-    console.log(event.target.value);
-    setNewTodoData((prevData) => ({
-      ...prevData,
-      priority: parseInt(event.target.value),
-    }));
   };
 
   // 컴포넌트가 만들어줄 HTML Tag set을 반환.
@@ -123,13 +96,7 @@ const TodoMain = () => {
         <TodoHeader onAllDoneChange={onAllDoneChangeHandler} />
         <TodoList todoDatas={cachedData} onDoneChange={onDoneChangeHandler} />
       </ul>
-      <TodoAppender
-        inputData={{ todo, dueDate, priority }}
-        onTaskKeyUp={onTaskKeyUpHandler}
-        onDateChange={onDateChangeHandler}
-        onSaveButtonClick={onSaveButtonClickHandler}
-        onPrioritySelectChange={onPrioritySelectChangeHandler}
-      />
+      <TodoAppender onSaveButtonClick={onSaveButtonClickHandler} />
     </div>
   );
 };

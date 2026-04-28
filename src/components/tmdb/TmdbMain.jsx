@@ -7,10 +7,16 @@ import TrendSelectors from "./trend/TrendSelectors.jsx";
 import trendData from "./trend/trend.json";
 
 const TmdbMain = () => {
-  const [{ sectionName, selectors, items }] = useState(trendData);
+  const [{ sectionName, selectorsKR, items }] = useState(trendData);
+  const [selectors, setSelectors] = useState("today");
 
   return (
-    <TrendBox selectors={selectors} items={items}>
+    <TrendBox
+      selectors={selectors}
+      setSelectors={setSelectors}
+      selectorsKR={selectorsKR}
+      items={items}
+    >
       <TrendHeader>
         <h1>{sectionName}</h1>
         <TrendSelectors />

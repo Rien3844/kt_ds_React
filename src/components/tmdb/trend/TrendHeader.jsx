@@ -3,12 +3,16 @@ import TrendContext from "./contexts/TrendContext.jsx";
 import TrendSelectors from "./TrendSelectors.jsx";
 
 const TrendHeader = ({ children }) => {
-  const { componentName } = useContext(TrendContext);
-  if (!componentName || componentName !== "TrendBox") {
+  const parentContext = useContext(TrendContext);
+  if (
+    !parentContext.componentName ||
+    parentContext.componentName !== "TrendBox"
+  ) {
     return <></>;
   }
 
   const providerProps = {
+    ...parentContext,
     componentName: "TrendHeader",
   };
 

@@ -1,7 +1,10 @@
-import { useRef } from "react";
-import { Confirm } from "../ui/Modal";
+import { useContext, useRef } from "react";
+import { Confirm } from "../ui/Modal.jsx";
+import { TodoContext } from "./contexts/TodoContext.jsx";
 
-const TodoHeader = ({ onAllDoneChange }) => {
+const TodoHeader = () => {
+  const { allDone } = useContext(TodoContext);
+
   const checkboxRef = useRef();
   const confirmRef = useRef();
 
@@ -18,7 +21,7 @@ const TodoHeader = ({ onAllDoneChange }) => {
   };
 
   const onConfirmOkClickHandler = () => {
-    onAllDoneChange(checkboxRef.current.checked);
+    allDone(checkboxRef.current.checked);
   };
   const onConfirmCloseClickHandler = () => {
     checkboxRef.current.checked = !checkboxRef.current.checked;

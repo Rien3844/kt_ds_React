@@ -1,7 +1,10 @@
-import { useRef } from "react";
-import { Alert } from "../ui/Modal";
+import { useContext, useRef } from "react";
+import { Alert } from "../ui/Modal.jsx";
+import { TodoContext } from "./contexts/TodoContext.jsx";
 
-const TodoAppender = ({ onSaveButtonClick }) => {
+const TodoAppender = () => {
+  const { addTodo } = useContext(TodoContext);
+
   const todoAlertRef = useRef();
 
   const taskRef = useRef();
@@ -22,7 +25,7 @@ const TodoAppender = ({ onSaveButtonClick }) => {
       return;
     }
 
-    onSaveButtonClick(
+    addTodo(
       taskRef.current.value,
       dueDateRef.current.value,
       priorityRef.current.value,

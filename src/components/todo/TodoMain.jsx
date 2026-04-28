@@ -6,6 +6,8 @@ import { StateTest } from "./stateTest.jsx";
 import TodoAppender from "./TodoAppender.jsx";
 import TodoHeader from "./TodoHeader.jsx";
 import TodoList from "./TodoList.jsx";
+import TodoItem from "./TodoItem.jsx";
+import TodoGrid from "./TodoGrid.jsx";
 
 // ecma function (fat arrow function)
 // ecma에서의 함수 만드는 방식
@@ -88,14 +90,25 @@ const TodoMain = () => {
   // 컴포넌트가 만들어줄 HTML Tag set을 반환.
   return (
     <div className="wrapper">
-      <div>
-        <StateTest />
-      </div>
       <header>React Todo</header>
-      <ul className="tasks">
+      <TodoGrid>
         <TodoHeader onAllDoneChange={onAllDoneChangeHandler} />
-        <TodoList todoDatas={cachedData} onDoneChange={onDoneChangeHandler} />
-      </ul>
+        <TodoList todoDatas={cachedData} onDoneChange={onDoneChangeHandler}>
+          {cachedData.map((todo) => (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              onDoneChange={onDoneChangeHandler}
+            />
+            // <TodoItemForChildren>
+            //   <input id={todo.id} type="checkbox" />
+            //   <label htmlFor={todo.id}>{todo.todo}</label>
+            //   <span className="due-date">{todo.dueDate}</span>
+            //   <span className="priority">{priorities[todo.priority]}</span>
+            // </TodoItemForChildren>
+          ))}
+        </TodoList>
+      </TodoGrid>
       <TodoAppender onSaveButtonClick={onSaveButtonClickHandler} />
     </div>
   );

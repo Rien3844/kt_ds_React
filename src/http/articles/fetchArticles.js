@@ -19,14 +19,20 @@ export const fetchArticleList = async (pageNo = 0, listSize = 10) => {
 // JWT 인증 정보를 받아올 함수 /api/authorization
 export const fetchJsonWebToken = async (id, password) => {
   try {
-    const fetchResult = await fetch("api/authorization");
+    const fetchResult = await fetch(
+      "http://192.168.211.20:8080/api/authorization",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, password }),
+      },
+    );
     const loginResult = await fetchResult.json();
 
     return loginResult;
   } catch (e) {
     return {
-      // TODO 들어오는값 맞는지 확인.
-      token: {},
+      token: null,
       errors: "로그인 정보가 잘못되었습니다.",
     };
   }

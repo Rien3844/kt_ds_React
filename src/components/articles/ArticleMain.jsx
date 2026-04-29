@@ -1,4 +1,3 @@
-/** @format */
 // articles.json 파일 불러오기
 import { useEffect, useState } from "react";
 import ArticleHeader from "./ArticleHeader.jsx";
@@ -15,11 +14,23 @@ const ArticleMain = () => {
   // 컴포넌트가 재실행된다. (props의 전달 여부 관계 없이.)
   console.log("ArticleMain");
 
-  const [token, setToken] = useState();
-  const onLoginButtonClickHandler = () => {
-    //TODO 내용구성(버튼 클릭했을때, ID,PWD맞는지 확인하고 token발급)
-    token;
+  const [token, setToken] = useState(null);
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onLoginButtonClickHandler = async () => {
+    const jsonWebToken = await fetchJsonWebToken(id, password);
+    if (jsonWebToken.errors) {
+      alert(jsonWebToken.erros);
+    } else {
+      setToken(jsonWebToken.token);
+    }
   };
+  useEffect(() => {
+    if (token) {
+      console.log("받은 토큰", token);
+    }
+  }, [token]);
 
   const [viewPageNo, setViewPageNo] = useState(0);
 
@@ -63,15 +74,6 @@ const ArticleMain = () => {
     refreshArticleList();
   }, [viewPageNo]);
 
-  const getJsonWebToken = async () => {
-    //TODO JWTfetch가져오기
-    const jsonWebToken = await fetchJsonWebToken();
-    setToken(jsonWebToken);
-    if (jsonWebToken.errors) {
-      alert(jsonWebToken.erros);
-    }
-  };
-
   const onAddArticleClickHandler = (subject, name, email, content) => {
     setArticles((prevData) => [
       ...prevData,
@@ -95,11 +97,19 @@ const ArticleMain = () => {
       <div>
         <div>
           ID
-          <input type="text" />
+          <input
+            type="text"
+            value={id}
+            onChange={(id) => setId(id.target.value)}
+          />
         </div>
         <div>
           PWD
-          <input type="text" />
+          <input
+            type="text"
+            value={password}
+            onChange={(pwd) => setPassword(pwd.target.value)}
+          />
         </div>
       </div>
       <button onClick={onLoginButtonClickHandler}>로그인</button>

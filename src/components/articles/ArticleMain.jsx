@@ -5,12 +5,20 @@ import ArticleHeader from "./ArticleHeader.jsx";
 import ArticleList from "./ArticleList.jsx";
 import ArticleWriter from "./ArticleWriter.jsx";
 import ArticleWriter2 from "./ArticleWriter2.jsx";
-import { fetchArticleList } from "../../http/articles/fetchArticles.js";
+import {
+  fetchArticleList,
+  fetchJsonWebToken,
+} from "../../http/articles/fetchArticles.js";
 
 const ArticleMain = () => {
   // state를 변경했다!
   // 컴포넌트가 재실행된다. (props의 전달 여부 관계 없이.)
   console.log("ArticleMain");
+
+  const [token, setToken] = useState();
+  const onLoginButtonClickHandler = () => {
+    token;
+  };
 
   const [viewPageNo, setViewPageNo] = useState(0);
 
@@ -54,6 +62,14 @@ const ArticleMain = () => {
     refreshArticleList();
   }, [viewPageNo]);
 
+  const getJsonWebToken = async () => {
+    const jsonWebToken = await fetchJsonWebToken();
+    setToken(jsonWebToken);
+    if (jsonWebToken.errors) {
+      alert(jsonWebToken.erros);
+    }
+  };
+
   const onAddArticleClickHandler = (subject, name, email, content) => {
     setArticles((prevData) => [
       ...prevData,
@@ -74,6 +90,17 @@ const ArticleMain = () => {
 
   return (
     <div className="wrapper">
+      <div>
+        <div>
+          ID
+          <input type="text" />
+        </div>
+        <div>
+          PWD
+          <input type="text" />
+        </div>
+      </div>
+      <button onClick={onLoginButtonClickHandler}>로그인</button>
       <div>{count}개의 게시글이 검색되었습니다.</div>
       <table>
         <ArticleHeader />

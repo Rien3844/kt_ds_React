@@ -17,6 +17,7 @@ const ArticleMain = () => {
 
   const [token, setToken] = useState();
   const onLoginButtonClickHandler = () => {
+    //TODO 내용구성(버튼 클릭했을때, ID,PWD맞는지 확인하고 token발급)
     token;
   };
 
@@ -63,6 +64,7 @@ const ArticleMain = () => {
   }, [viewPageNo]);
 
   const getJsonWebToken = async () => {
+    //TODO JWTfetch가져오기
     const jsonWebToken = await fetchJsonWebToken();
     setToken(jsonWebToken);
     if (jsonWebToken.errors) {

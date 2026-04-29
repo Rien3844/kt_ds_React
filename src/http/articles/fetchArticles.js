@@ -25,6 +25,7 @@ export const fetchJsonWebToken = async (id, password) => {
     return loginResult;
   } catch (e) {
     return {
+      // TODO 들어오는값 맞는지 확인.
       token: {},
       errors: "로그인 정보가 잘못되었습니다.",
     };

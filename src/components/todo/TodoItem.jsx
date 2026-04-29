@@ -12,7 +12,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
 
   const { componentName } = useContext(TodoContext);
 
-  console.log("TodoItem: " + componentName);
+  console.log("TodoItem");
 
   if (!componentName || componentName !== "TodoList") {
     return <></>;
@@ -20,9 +20,9 @@ const TodoItem = ({ todo, onDoneChange }) => {
 
   //        props todo의 이름과 todo.todo의 이름이 같아 객체 구조 분해 불가.
   //        todo.todo의 이름을 todoTask로 변경해 할당.
-  const { id, todo: todoTask, dueDate, priority } = todo;
+  const { id, task: todoTask, dueDate, priority } = todo;
 
-  const doneClass = todo.isDone ? "done" : "";
+  const doneClass = todo.done ? "done" : "";
 
   const onDoneChangeHandler = () => {
     let message = `"${todoTask}"을 "${checkboxRef.current.checked ? "완료" : "미완료"}" 하시겠습니까?`;
@@ -31,7 +31,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
 
   const onConfirmOkClickHandler = () => {
     console.log(">", checkboxRef.current.checked);
-    // onDoneChange(todo.id, !todo.isDone);
+    // onDoneChange(todo.id, !todo.done);
     // input type="checkbox"에 checked가 props로 할당되어 변경된 체크 상태를 가져올 수 없음.
     // 원래의 체크 상태를 가져와 반전시키면 된다.
     // 나중에 useEffect를 사용하면 변경 가능.
@@ -39,7 +39,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
   };
 
   const onConfirmCloseClickHandler = () => {
-    // checkboxRef.current.checked = todo.isDone;
+    // checkboxRef.current.checked = todo.done;
     // input type="checkbox"에 checked가 props로 할당되어 변경된 체크 상태를 가져올 수 없음.
     // props가 그대로 표현되도록 원래의 체크 상태를 그대로 두면 된다.
   };
@@ -54,7 +54,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
       <input
         id={id}
         type="checkbox"
-        checked={todo.isDone}
+        checked={todo.done}
         ref={checkboxRef}
         onChange={onDoneChangeHandler}
       />

@@ -1,14 +1,16 @@
-import { useContext, useRef } from "react";
-import { Confirm } from "../ui/Modal";
-import TodoContext from "./contexts/TodoContext";
+/** @format */
 
-const TodoHeader = ({ onAllDoneChange }) => {
+import { memo, useContext, useRef } from "react";
+import { Confirm } from "../ui/Modal.jsx";
+import TodoContext from "./contexts/TodoContext.jsx";
+
+const TodoHeader = memo(({ count, onAllDoneChange }) => {
   const checkboxRef = useRef();
   const confirmRef = useRef();
 
   const { componentName } = useContext(TodoContext);
 
-  console.log("TodoHeader: " + componentName);
+  console.log("TodoHeader");
 
   if (!componentName || componentName !== "TodoGrid") {
     return <></>;
@@ -26,7 +28,7 @@ const TodoHeader = ({ onAllDoneChange }) => {
     confirmRef.current.showConfirm(message);
   };
 
-  const onConfirmOkClickHandler = () => {
+  const onConfirmOkClickHander = () => {
     onAllDoneChange(checkboxRef.current.checked);
   };
   const onConfirmCloseClickHandler = () => {
@@ -34,22 +36,29 @@ const TodoHeader = ({ onAllDoneChange }) => {
   };
 
   return (
-    <li className="tasks-header">
-      <Confirm
-        dialogRef={confirmRef}
-        onOkClick={onConfirmOkClickHandler}
-        onCloseClick={onConfirmCloseClickHandler}
-      />
-      <input
-        id="checkall"
-        type="checkbox"
-        ref={checkboxRef}
-        onChange={onAllDoneChangeHandler}
-      />
-      <label>Task</label>
-      <span className="due-date">Due date</span>
-      <span className="priority">Priority</span>
-    </li>
+    <>
+      <li className="tasks-counter">
+        <div>전체: {count.all}</div>
+        <div>진행중: {count.process}</div>
+        <div>완료: {count.done}</div>
+      </li>
+      <li className="tasks-header">
+        <Confirm
+          dialogRef={confirmRef}
+          onOkClick={onConfirmOkClickHander}
+          onCloseClick={onConfirmCloseClickHandler}
+        />
+        <input
+          id="checkall"
+          type="checkbox"
+          ref={checkboxRef}
+          onChange={onAllDoneChangeHandler}
+        />
+        <label>Task</label>
+        <span className="due-date">Due Date</span>
+        <span className="priority">Priority</span>
+      </li>
+    </>
   );
-};
+});
 export default TodoHeader;

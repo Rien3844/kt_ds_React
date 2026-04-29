@@ -1,99 +1,107 @@
-// 기존 함수 만들던 방식
-// ==> function abc (){}
+/** @format */
 
-import { useState } from "react";
-import { StateTest } from "./stateTest.jsx";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { StateTest } from "./StateTest.jsx";
 import TodoAppender from "./TodoAppender.jsx";
 import TodoHeader from "./TodoHeader.jsx";
 import TodoList from "./TodoList.jsx";
 import TodoItem from "./TodoItem.jsx";
 import TodoGrid from "./TodoGrid.jsx";
+import AddCalculator from "./AddCaculator.jsx";
+import {
+  fetchAddTodo,
+  fetchAllDoneTodo,
+  fetchDoneTodo,
+  fetchTodoList,
+} from "../../http/todo/fetchTodo.js";
 
 // ecma function (fat arrow function)
-// ecma에서의 함수 만드는 방식
-// const : 상수를 정의하는 키워드.
-// (parameter) => { function body } ==> fat arrow function
+// const: 상수를 정의하는 키워드.
+// (parameter) => {function body} : fat arrow function
 // const abc = () => {};
 
-// 일반 function과 fat arrow function의 기능적 차이.
-// function == 함수를 호출한 대상을 this 객체로 알 수 있다.
-// fat arrow function == this 키워드 사용 불가.
-// => 함수를 호출한 대상을 알 수 없다? X ==> event 파라미터로만 알 수 있음.
+// function과 fat arrow function의 기능적 차이.
+// function => 함수를 호출한 대상을 this 객체로 알 수 있다.
+// fat arrow function => this 키워드 사용 불가.
+//         함수를 호출한 대상을 알 수 없다? event 파라미터로만 알 수 있음.
 
-// const 에러 나는 이유?
-// ==> export default 이후에 const 키워드가 나타날 수 없음.(규칙)
-// export default const TodoMain = () => {}
+// export default 이후에 const 키워드가 나타날 수 없음.
 const TodoMain = () => {
-  // const ==> 상수를 정의
-  // let ==> 변수를 정의
-  // TODO JSON DATA
-  // 각각의 item을 배열내부의 객체로 표현
-  const todoDatas = [
-    {
-      id: "todo_1",
-      todo: "React Component Master",
-      dueDate: "2026-04-22",
-      priority: 1,
-      isDone: true,
-    },
+  console.log("TodoMain");
 
-    {
-      id: "todo_2",
-      todo: "React Component Master2",
-      dueDate: "2026-04-23",
-      priority: 2,
-      isDone: false,
-    },
+  const [cachedData, setCachedData] = useState([]);
 
-    {
-      id: "todo_3",
-      todo: "React Component Master3",
-      dueDate: "2026-04-24",
-      priority: 3,
-      isDone: false,
-    },
-  ];
+  const refreshTodoList = async () => {
+    const todoList = await fetchTodoList();
+    setCachedData(todoList.body);
 
-  const [cachedData, setCachedData] = useState(todoDatas);
-
-  const onAllDoneChangeHandler = (isDone) => {
-    setCachedData((prevData) => {
-      // cachedData를 반복하면서 모든 isDone의 값을 변경한다.
-      const newData = prevData.map((todo) => ({ ...todo, isDone }));
-      //변경된 결과를 반환한다.
-      return newData;
-    });
+    if (todoList.errors) {
+      alert(todoList.errors);
+    }
   };
+
+  useEffect(() => {
+    refreshTodoList();
+  }, []);
+
+  const todoCount = useMemo(() => {
+    return {
+      all: cachedData.length,
+      // 완료된 todo만 찾아 그 갯수를 반환.
+      done: cachedData.filter((todo) => todo.done).length,
+      // 완료 안된 todo만 찾아 그 갯수를 반환.
+      process: cachedData.filter((todo) => !todo.done).length,
+    };
+  }, [cachedData]);
+
+  const onAllDoneChangeHandler = useCallback(async () => {
+    const allDoneResult = await fetchAllDoneTodo();
+    if (!allDoneResult.errors) {
+      refreshTodoList();
+    } else {
+      alert(allDoneResult.errors);
+    }
+  }, []);
 
   // 특정 todo의 isDone 값을 반전시키는 함수.
   // 이 함수를 TodoList에게 props로 전달.
-  // TodoList는 TodoItem에게 props로 전달.
-  const onDoneChangeHandler = (todoId, isDone) => {
-    // 일반적인 값을 넣을 수도 있지만, 함수도 넣을 수 있음.
-    // 왜 함수를 쓰는가? = parameter에 변경 이전 데이터(cachedData)를 넣어줄 예정.
-    setCachedData((prevData) =>
-      prevData.map((todo) =>
-        todo.id === todoId ? { ...todo, isDone: !todo.isDone } : todo,
-      ),
-    );
-    console.log(isDone);
+  // TodoList는 TodoItem에게 함수를 props 전달.
+  const onDoneChangeHandler = async (todoId) => {
+    const doneResult = await fetchDoneTodo(todoId);
+    if (!doneResult.errors) {
+      refreshTodoList();
+    } else {
+      alert(doneResult.errors);
+    }
   };
 
-  const onSaveButtonClickHandler = (todo, dueDate, priority) => {
-    console.log("저장합니다.");
-    setCachedData((prevData) => [
-      ...prevData,
-      { id: prevData.length + 1, todo, dueDate, priority, isDone: false },
-    ]);
-  };
+  const onSaveButtonClickHandler = useCallback(
+    async (todo, dueDate, priority) => {
+      console.log("저장합니다.");
+      // fetch ==> 서버에게 todo를 등록하게 한다.
 
-  // 컴포넌트가 만들어줄 HTML Tag set을 반환.
+      const addResult = await fetchAddTodo(todo, dueDate, priority);
+      if (!addResult.errors) {
+        refreshTodoList();
+      } else {
+        alert(addResult.errors);
+      }
+    },
+    [],
+  );
+
+  // 컴포넌트가 만들어줄 HTML Tag set를 반환.
   return (
     <div className="wrapper">
+      {/* <StateTest /> */}
+      {/* <AddCalculator /> */}
       <header>React Todo</header>
       <TodoGrid>
-        <TodoHeader onAllDoneChange={onAllDoneChangeHandler} />
-        <TodoList todoDatas={cachedData} onDoneChange={onDoneChangeHandler}>
+        <TodoHeader
+          count={todoCount}
+          onAllDoneChange={onAllDoneChangeHandler}
+        />
+        <TodoList>
           {cachedData.map((todo) => (
             <TodoItem
               key={todo.id}
@@ -113,4 +121,5 @@ const TodoMain = () => {
     </div>
   );
 };
+
 export default TodoMain;

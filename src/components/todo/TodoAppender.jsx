@@ -1,7 +1,16 @@
-import { useRef } from "react";
-import { Alert } from "../ui/Modal";
+/** @format */
 
-const TodoAppender = ({ onSaveButtonClick }) => {
+import { memo, useRef } from "react";
+import { Alert } from "../ui/Modal.jsx";
+
+const TodoAppender = memo(({ onSaveButtonClick }) => {
+  console.log("TodoAppender");
+
+  // Component Rendering을 Delay
+  // for (let i = 1; i <= 100000; i++) {
+  //   console.log(i);
+  // }
+
   const todoAlertRef = useRef();
 
   const taskRef = useRef();
@@ -10,15 +19,15 @@ const TodoAppender = ({ onSaveButtonClick }) => {
 
   const onSaveButtonClickHandler = () => {
     if (!taskRef.current.value) {
-      todoAlertRef.current.showModal("내용을 입력하세요.");
+      todoAlertRef.current.showModal("TODO를 입력하세요.");
       return;
     }
     if (!dueDateRef.current.value) {
-      todoAlertRef.current.showModal("날짜를 입력하세요.");
+      todoAlertRef.current.showModal("완료 날짜를 선택하세요.");
       return;
     }
     if (!priorityRef.current.value) {
-      todoAlertRef.current.showModal("우선순위를 입력하세요.");
+      todoAlertRef.current.showModal("우선순위를 선택하세요.");
       return;
     }
 
@@ -49,6 +58,5 @@ const TodoAppender = ({ onSaveButtonClick }) => {
       </button>
     </footer>
   );
-};
-
+});
 export default TodoAppender;

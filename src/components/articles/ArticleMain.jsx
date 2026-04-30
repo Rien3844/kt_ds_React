@@ -4,7 +4,10 @@ import ArticleHeader from "./ArticleHeader.jsx";
 import ArticleList from "./ArticleList.jsx";
 import ArticleWriter from "./ArticleWriter.jsx";
 import ArticleWriter2 from "./ArticleWriter2.jsx";
-import { fetchArticleList } from "../../http/articles/fetchArticles.js";
+import {
+  fetchAddArticle,
+  fetchArticleList,
+} from "../../http/articles/fetchArticles.js";
 import { fetchLogin } from "../../http/articles/fetchLogin.js";
 import { isString } from "../../utils/type.js";
 import { getValidationResult } from "../../utils/errorhandler.js";
@@ -13,6 +16,9 @@ const ArticleMain = () => {
   // state를 변경했다!
   // 컴포넌트가 재실행된다. (props의 전달 여부 관계 없이.)
   console.log("ArticleMain");
+
+  // ImperativeHandle를 위한 ref 생성.
+  const writerRef = useRef();
 
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -40,7 +46,7 @@ const ArticleMain = () => {
       emailRef.current.value,
       passwordRef.current.value,
     );
-    setToken;
+    setToken(loginResult.token);
 
     if (loginResult.error) {
       if (isString(loginResult.error)) {
@@ -78,22 +84,19 @@ const ArticleMain = () => {
     refreshArticleList();
   }, [viewPageNo]);
 
-  const onAddArticleClickHandler = (subject, name, email, content) => {
-    setArticles((prevData) => [
-      ...prevData,
-      {
-        id: prevData.length + 1,
-        subject,
-        content,
-        email,
-        viewCnt: parseInt(Math.random() * 10000),
-        crtDt: "2026-01-01",
-        mdfyDt: null,
-        fileGroupId: null,
-        membersVO: { email, name },
-        files: [],
-      },
-    ]);
+  const onAddArticleClickHandler = async (subject, content, attachFile) => {
+    const addResult = await fetchAddArticle(
+      token,
+      subject,
+      content,
+      attachFile,
+    );
+
+    if (addResult.error) {
+      writerRef.current.setResponseError(addResult.error);
+    } else {
+      refreshArticleList();
+    }
   };
 
   return (
@@ -137,7 +140,10 @@ const ArticleMain = () => {
           </button>
         )}
       </div>
-      <ArticleWriter onAddArticleClick={onAddArticleClickHandler} />
+      <ArticleWriter
+        errorHandleRef={writerRef}
+        onAddArticleClick={onAddArticleClickHandler}
+      />
     </div>
   );
 };

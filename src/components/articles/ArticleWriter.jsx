@@ -1,7 +1,9 @@
 /** @format */
 
-import { useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
+import { isString } from "../../utils/type.js";
+import { getValidationResult } from "../../utils/errorhandler.js";
 
 const Input = ({ id, title, type = "text", ref, ...props }) => {
   console.log("Input");
@@ -23,15 +25,29 @@ const Textarea = ({ id, title, ref, ...props }) => {
   );
 };
 
-const ArticleWriter = ({ onAddArticleClick }) => {
+const ArticleWriter = ({ errorHandleRef, onAddArticleClick }) => {
   console.log("ArticleWriter");
+
+  const [addError, setAddError] = useState();
+
+  // useImperativeHandle 쓰는 이유? => 자식이 부모한테 값을주려고.
+  useImperativeHandle(errorHandleRef, () => {
+    return {
+      setResponseError(fetchError) {
+        if (isString(fetchError)) {
+          setAddError(fetchError);
+        } else {
+          setAddError(getValidationResult(fetchError));
+        }
+      },
+    };
+  });
 
   const [viewMode, setViewMode] = useState("button");
 
   const subjectRef = useRef();
-  const nameRef = useRef();
-  const emailRef = useRef();
   const contentRef = useRef();
+  const attachFileRef = useRef();
 
   const alertRef = useRef();
 
@@ -41,14 +57,6 @@ const ArticleWriter = ({ onAddArticleClick }) => {
       alertRef.current.showModal("제목을 입력해주세요.");
       return;
     }
-    if (!nameRef.current.value) {
-      alertRef.current.showModal("이름을 입력해주세요.");
-      return;
-    }
-    if (!emailRef.current.value) {
-      alertRef.current.showModal("이메일을 입력해주세요.");
-      return;
-    }
     if (!contentRef.current.value) {
       alertRef.current.showModal("내용을 입력해주세요.");
       return;
@@ -56,15 +64,13 @@ const ArticleWriter = ({ onAddArticleClick }) => {
 
     onAddArticleClick(
       subjectRef.current.value,
-      nameRef.current.value,
-      emailRef.current.value,
       contentRef.current.value,
+      attachFileRef.current.files,
     );
 
     subjectRef.current.value = "";
-    nameRef.current.value = "";
-    emailRef.current.value = "";
     contentRef.current.value = "";
+    attachFileRef.current.value = "";
   };
 
   const onViewChangeButtonClickHandler = (viewName) => {
@@ -84,10 +90,16 @@ const ArticleWriter = ({ onAddArticleClick }) => {
       {viewMode === "form" && (
         <>
           <Alert dialogRef={alertRef} />
+          {isString(addError) && <div>인증이 필요합니다.</div>}
           <Input id="subject" title="제목" ref={subjectRef} />
-          <Input id="name" title="이름" ref={nameRef} />
-          <Input id="email" title="이메일" ref={emailRef} />
           <Textarea id="content" title="내용" ref={contentRef} />
+          <Input
+            type="file"
+            id="file"
+            title="첨부파일"
+            ref={attachFileRef}
+            multiple
+          />
 
           <button
             type="button"

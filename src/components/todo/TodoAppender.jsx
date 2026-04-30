@@ -1,9 +1,11 @@
 /** @format */
 
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
+import { fetchAddTodo, fetchTodoList } from "../../http/todo/fetchTodo.js";
+import { useDispatch } from "react-redux";
 
-const TodoAppender = memo(({ onSaveButtonClick }) => {
+const TodoAppender = memo(() => {
   console.log("TodoAppender");
 
   // Component Rendering을 Delay
@@ -11,13 +13,17 @@ const TodoAppender = memo(({ onSaveButtonClick }) => {
   //   console.log(i);
   // }
 
+  const [isFetching, setIsFetching] = useState(false);
+
   const todoAlertRef = useRef();
 
   const taskRef = useRef();
   const dueDateRef = useRef();
   const priorityRef = useRef();
 
-  const onSaveButtonClickHandler = () => {
+  const reactReduxDispatcher = useDispatch();
+
+  const onSaveButtonClickHandler = async () => {
     if (!taskRef.current.value) {
       todoAlertRef.current.showModal("TODO를 입력하세요.");
       return;
@@ -31,11 +37,31 @@ const TodoAppender = memo(({ onSaveButtonClick }) => {
       return;
     }
 
-    onSaveButtonClick(
+    // 게시글 추가할 때 낙관적 업데이트를 한다 ==> 이때 게시글의 PK값을 알 수 없다.
+    // id(PK)가 없는 값이니
+    // PK를 만들어야하는 경우에는 낙관적 업데이트를 하면 안된다.
+    // reactReduxDispatcher({
+    //   type: "todo-add",
+    //   payload: {
+    //     task: taskRef.current.value,
+    //     dueDate: dueDateRef.current.value,
+    //     priority: priorityRef.current.value,
+    //   },
+    // });
+
+    setIsFetching(true);
+    const addResult = await fetchAddTodo(
       taskRef.current.value,
       dueDateRef.current.value,
       priorityRef.current.value,
     );
+    setIsFetching(false);
+
+    if (addResult.errors) {
+      alert(addResult.errors);
+    }
+    const fetchResult = await fetchTodoList();
+    reactReduxDispatcher({ type: "todo-refresh", payload: fetchResult.body });
 
     taskRef.current.value = "";
     dueDateRef.current.value = "";
@@ -53,8 +79,12 @@ const TodoAppender = memo(({ onSaveButtonClick }) => {
         <option value="2">보통</option>
         <option value="3">낮음</option>
       </select>
-      <button type="button" onClick={onSaveButtonClickHandler}>
-        Save
+      <button
+        type="button"
+        disabled={isFetching}
+        onClick={onSaveButtonClickHandler}
+      >
+        {isFetching ? "저장중...." : "저장"}
       </button>
     </footer>
   );

@@ -3,9 +3,13 @@
 import { useContext, useRef } from "react";
 import { Confirm } from "../ui/Modal.jsx";
 import TodoContext from "./contexts/TodoContext.jsx";
+import { fetchDoneTodo, fetchTodoList } from "../../http/todo/fetchTodo.js";
+import { useDispatch } from "react-redux";
 
-const TodoItem = ({ todo, onDoneChange }) => {
+const TodoItem = ({ todo }) => {
   const priorities = ["없음", "높음", "보통", "낮음"];
+
+  const reactReduxDispatcher = useDispatch();
 
   const todoItemConfirmRef = useRef();
   const checkboxRef = useRef();
@@ -29,13 +33,22 @@ const TodoItem = ({ todo, onDoneChange }) => {
     todoItemConfirmRef.current.showConfirm(message);
   };
 
-  const onConfirmOkClickHandler = () => {
+  const onConfirmOkClickHandler = async () => {
     console.log(">", checkboxRef.current.checked);
     // onDoneChange(todo.id, !todo.done);
     // input type="checkbox"에 checked가 props로 할당되어 변경된 체크 상태를 가져올 수 없음.
     // 원래의 체크 상태를 가져와 반전시키면 된다.
     // 나중에 useEffect를 사용하면 변경 가능.
-    onDoneChange(todo.id, !checkboxRef.current.checked);
+
+    reactReduxDispatcher({ type: "todo-done-item", payload: id });
+
+    const doneResult = await fetchDoneTodo(id);
+    if (doneResult.errors) {
+      alert(doneResult.errors);
+    } else {
+      const fetchResult = await fetchTodoList();
+      reactReduxDispatcher({ type: "todo-refresh", payload: fetchResult.body });
+    }
   };
 
   const onConfirmCloseClickHandler = () => {

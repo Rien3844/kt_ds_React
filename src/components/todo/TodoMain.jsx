@@ -8,6 +8,7 @@ import TodoItem from "./TodoItem.jsx";
 import TodoGrid from "./TodoGrid.jsx";
 import { fetchTodoList } from "../../http/todo/fetchTodo.js";
 import { useDispatch, useSelector } from "react-redux";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice.js";
 
 // ecma function (fat arrow function)
 // const: 상수를 정의하는 키워드.
@@ -25,13 +26,15 @@ const TodoMain = () => {
 
   // const [cachedData, setCachedData] = useState([]);
   // ReactRedux Store에서 todo state를 가져온다.
-  const todoList = useSelector((store) => store.todo);
+  const { list: todoList } = useSelector((store) => store.todo);
   const storeDispatcher = useDispatch();
 
   const refreshTodoList = async () => {
     const fetchResult = await fetchTodoList();
     // setCachedData(todoList.body);
-    storeDispatcher({ type: "todo-refresh", payload: fetchResult.body });
+    // redux에서 storeDispatcher({type: "todo-refresh", payload:fetchResult.body});
+    storeDispatcher(todoAction.refresh(fetchResult.body));
+    // == storeDispatcher({type: "todo-slice/refresh", payload:fetchResult.body});
 
     if (todoList.errors) {
       alert(todoList.errors);

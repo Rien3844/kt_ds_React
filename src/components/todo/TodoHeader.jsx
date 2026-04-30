@@ -5,13 +5,14 @@ import { Confirm } from "../ui/Modal.jsx";
 import TodoContext from "./contexts/TodoContext.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllDoneTodo, fetchTodoList } from "../../http/todo/fetchTodo.js";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice.js";
 
 const TodoHeader = memo(() => {
   const checkboxRef = useRef();
   const confirmRef = useRef();
 
   // react-redux store 에서 todo 가져오기
-  const todoList = useSelector((sotre) => sotre.todo);
+  const { list: todoList } = useSelector((sotre) => sotre.todo);
   const count = {
     all: todoList.length,
     // 완료된 todo만 찾아 그 갯수를 반환.
@@ -43,21 +44,21 @@ const TodoHeader = memo(() => {
   };
 
   const onConfirmOkClickHander = async () => {
-    // all done 에 대한 낙관적 업데이트 지냏ㅇ.
+    // all done 에 대한 낙관적 업데이트 진행.
     // 사용자가 all done을 요청했을 때, 요청결과와 상관 없이 우선 all done이 된 것 처럼 보여준다.
     // fetch 이후에 실패했을 경우, 원래 상태로 돌려준다.
     //             성공했을 경우, 변경된 상태를 유지한다.
     //             all done을 수행하는 중에 다른 사용자로 인해 데이터가 추가됐다면 불러올 필요.
 
     // payload로 보내줄만한게 없어서 안보냄.
-    reactReduxDispatcher({ type: "todo-all-done" });
+    reactReduxDispatcher(todoAction.allDone());
 
     const allDoneResult = await fetchAllDoneTodo();
     if (allDoneResult.errors) {
       alert(allDoneResult.errors);
     }
     const fetchResult = await fetchTodoList();
-    reactReduxDispatcher({ type: "todo-refresh", payload: fetchResult.body });
+    reactReduxDispatcher(todoAction.refresh(fetchResult.body));
   };
 
   const onConfirmCloseClickHandler = () => {

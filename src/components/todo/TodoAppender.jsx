@@ -4,6 +4,7 @@ import { memo, useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
 import { fetchAddTodo, fetchTodoList } from "../../http/todo/fetchTodo.js";
 import { useDispatch } from "react-redux";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice.js";
 
 const TodoAppender = memo(() => {
   console.log("TodoAppender");
@@ -61,7 +62,7 @@ const TodoAppender = memo(() => {
       alert(addResult.errors);
     }
     const fetchResult = await fetchTodoList();
-    reactReduxDispatcher({ type: "todo-refresh", payload: fetchResult.body });
+    reactReduxDispatcher(todoAction.refresh(fetchResult.body));
 
     taskRef.current.value = "";
     dueDateRef.current.value = "";

@@ -5,6 +5,7 @@ import { Confirm } from "../ui/Modal.jsx";
 import TodoContext from "./contexts/TodoContext.jsx";
 import { fetchDoneTodo, fetchTodoList } from "../../http/todo/fetchTodo.js";
 import { useDispatch } from "react-redux";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice.js";
 
 const TodoItem = ({ todo }) => {
   const priorities = ["없음", "높음", "보통", "낮음"];
@@ -40,14 +41,14 @@ const TodoItem = ({ todo }) => {
     // 원래의 체크 상태를 가져와 반전시키면 된다.
     // 나중에 useEffect를 사용하면 변경 가능.
 
-    reactReduxDispatcher({ type: "todo-done-item", payload: id });
+    reactReduxDispatcher(todoAction.doneItem(id));
 
     const doneResult = await fetchDoneTodo(id);
     if (doneResult.errors) {
       alert(doneResult.errors);
     } else {
       const fetchResult = await fetchTodoList();
-      reactReduxDispatcher({ type: "todo-refresh", payload: fetchResult.body });
+      reactReduxDispatcher(todoAction.refresh(fetchResult.body));
     }
   };
 

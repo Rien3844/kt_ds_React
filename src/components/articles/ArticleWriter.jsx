@@ -4,6 +4,12 @@ import { useImperativeHandle, useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
 import { isString } from "../../utils/type.js";
 import { getValidationResult } from "../../utils/errorhandler.js";
+import { useDispatch, useSelector } from "react-redux";
+import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
+import {
+  fetchAddArticle,
+  fetchArticleList,
+} from "../../http/articles/fetchArticles.js";
 
 const Input = ({ id, title, type = "text", ref, ...props }) => {
   console.log("Input");
@@ -25,9 +31,8 @@ const Textarea = ({ id, title, ref, ...props }) => {
   );
 };
 
-const ArticleWriter = ({ errorHandleRef, onAddArticleClick }) => {
+const ArticleWriter = ({ errorHandleRef }) => {
   console.log("ArticleWriter");
-
   const [addError, setAddError] = useState();
 
   // useImperativeHandle 쓰는 이유? => 자식이 부모한테 값을주려고.
@@ -45,11 +50,38 @@ const ArticleWriter = ({ errorHandleRef, onAddArticleClick }) => {
 
   const [viewMode, setViewMode] = useState("button");
 
+  const reactReduxDispatcher = useDispatch();
+  const { token, viewPageNo } = useSelector((store) => store.article);
+
   const subjectRef = useRef();
   const contentRef = useRef();
   const attachFileRef = useRef();
-
   const alertRef = useRef();
+
+  const onAddArticleClickHandler = async (subject, content, attachFile) => {
+    const addResult = await fetchAddArticle(
+      token,
+      subject,
+      content,
+      attachFile,
+    );
+
+    if (addResult.error) {
+      errorHandleRef.current.setResponseError(addResult.error);
+      reactReduxDispatcher(articleAction.addArticleFailure(addResult.error));
+    } else {
+      reactReduxDispatcher(articleAction.addArticleSuccess(addResult));
+
+      const articleList = await fetchArticleList(viewPageNo);
+      const {
+        result: { count, result },
+        pagination,
+      } = articleList;
+      reactReduxDispatcher(
+        articleAction.refresh({ count, result, pagination }),
+      );
+    }
+  };
 
   // 저장을 클릭하면 입력했던 값을 가져와 출력한다.
   const onSaveButtonClickHandler = () => {
@@ -62,7 +94,7 @@ const ArticleWriter = ({ errorHandleRef, onAddArticleClick }) => {
       return;
     }
 
-    onAddArticleClick(
+    onAddArticleClickHandler(
       subjectRef.current.value,
       contentRef.current.value,
       attachFileRef.current.files,

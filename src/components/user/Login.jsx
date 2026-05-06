@@ -1,39 +1,44 @@
-import { useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchLogin } from "../../http/articles/fetchLogin.js";
-import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
-import { getValidationResult } from "../../utils/errorhandler.js";
-import { isString } from "../../utils/type.js";
+/** @format */
 
-const ArticleLogin = () => {
-  const reactReduxDispatcher = useDispatch();
+import { useRef, useState } from "react";
+import { isString } from "../../utils/type";
+import { getValidationResult } from "../../utils/errorHandler";
+import { fetchLogin } from "../../http/articles/fetchLogin";
+import { useDispatch, useSelector } from "react-redux";
+import { userAction } from "../../stores/toolkit/slices/userSlice";
+
+const Login = () => {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { token, loginErrors } = useSelector((store) => store.article);
+
+  const { token } = useSelector((store) => store.user);
+  const toolkitProvider = useDispatch();
+  const [loginErrors, setLoginErrors] = useState();
+
+  if (token) {
+    return <></>;
+  }
 
   const onLoginButtonClickHandler = async () => {
     const loginResult = await fetchLogin(
       emailRef.current.value,
       passwordRef.current.value,
     );
-    if (loginResult.token) {
-      reactReduxDispatcher(
-        articleAction.loginSuccess({ token: loginResult.token }),
-      );
-    } else {
-      const errorMsg = isString(loginResult.error)
-        ? loginResult.error
-        : getValidationResult(loginResult.error);
-      reactReduxDispatcher(articleAction.loginFailure(errorMsg));
+    toolkitProvider(userAction.login(loginResult.token));
+
+    if (loginResult.error) {
+      if (isString(loginResult.error)) {
+        setLoginErrors(loginResult.error);
+      } else {
+        setLoginErrors(getValidationResult(loginResult.error));
+      }
     }
   };
 
-  if (token) {
-    return null;
-  }
   return (
     <div>
       {isString(loginErrors) && <div>{loginErrors}</div>}
+
       <div>
         <label htmlFor="email">EMAIL</label>
         <input type="email" id="email" ref={emailRef} />
@@ -50,5 +55,4 @@ const ArticleLogin = () => {
     </div>
   );
 };
-
-export default ArticleLogin;
+export default Login;

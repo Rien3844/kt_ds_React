@@ -1,15 +1,15 @@
 /** @format */
 
-import { useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
 import { isString } from "../../utils/type.js";
 import { getValidationResult } from "../../utils/errorHandler.js";
+import { useDispatch, useSelector } from "react-redux";
+import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
 import {
   fetchAddArticle,
   fetchArticleList,
-} from "../../http/articles/fetchArticles";
-import { useDispatch, useSelector } from "react-redux";
-import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
+} from "../../http/articles/fetchArticles.js";
 
 const Input = ({ id, title, type = "text", ref, ...props }) => {
   console.log("Input");
@@ -31,30 +31,60 @@ const Textarea = ({ id, title, ref, ...props }) => {
   );
 };
 
-const ArticleWriter = () => {
+const ArticleWriter = ({ errorHandleRef }) => {
   console.log("ArticleWriter");
-
-  const { token } = useSelector((store) => store.user);
-
   const [addError, setAddError] = useState();
+
+  // useImperativeHandle 쓰는 이유? => 자식이 부모한테 값을주려고.
+  useImperativeHandle(errorHandleRef, () => {
+    return {
+      setResponseError(fetchError) {
+        if (isString(fetchError)) {
+          setAddError(fetchError);
+        } else {
+          setAddError(getValidationResult(fetchError));
+        }
+      },
+    };
+  });
+
   const [viewMode, setViewMode] = useState("button");
+
+  const reactReduxDispatcher = useDispatch();
+  const { token, viewPageNo } = useSelector((store) => store.article);
 
   const subjectRef = useRef();
   const contentRef = useRef();
   const attachFileRef = useRef();
-
   const alertRef = useRef();
 
-  const toolkitDispatcher = useDispatch();
+  const onAddArticleClickHandler = async (subject, content, attachFile) => {
+    const addResult = await fetchAddArticle(
+      token,
+      subject,
+      content,
+      attachFile,
+    );
 
-  if (!token) {
-    return <></>;
-  }
+    if (addResult.error) {
+      errorHandleRef.current.setResponseError(addResult.error);
+      reactReduxDispatcher(articleAction.addArticleFailure(addResult.error));
+    } else {
+      reactReduxDispatcher(articleAction.addArticleSuccess(addResult));
+
+      const articleList = await fetchArticleList(viewPageNo);
+      const {
+        result: { count, result },
+        pagination,
+      } = articleList;
+      reactReduxDispatcher(
+        articleAction.refresh({ count, result, pagination }),
+      );
+    }
+  };
 
   // 저장을 클릭하면 입력했던 값을 가져와 출력한다.
-  const onSaveButtonClickHandler = async () => {
-    console.log(alertRef);
-
+  const onSaveButtonClickHandler = () => {
     if (!subjectRef.current.value) {
       alertRef.current.showModal("제목을 입력해주세요.");
       return;
@@ -64,27 +94,11 @@ const ArticleWriter = () => {
       return;
     }
 
-    const addResult = await fetchAddArticle(
-      token,
+    onAddArticleClickHandler(
       subjectRef.current.value,
       contentRef.current.value,
       attachFileRef.current.files,
     );
-
-    if (addResult.error) {
-      if (isString(addResult.error)) {
-        setAddError(addResult.error);
-      } else {
-        setAddError(getValidationResult(addResult.error));
-      }
-    }
-
-    const fetchResult = await fetchArticleList();
-    const {
-      result: { count, result },
-      pagination,
-    } = fetchResult;
-    toolkitDispatcher(articleAction.refresh({ count, result, pagination }));
 
     subjectRef.current.value = "";
     contentRef.current.value = "";
@@ -108,7 +122,7 @@ const ArticleWriter = () => {
       {viewMode === "form" && (
         <>
           <Alert dialogRef={alertRef} />
-          {isString(addError) && <div>{addError}</div>}
+          {isString(addError) && <div>인증이 필요합니다.</div>}
           <Input id="subject" title="제목" ref={subjectRef} />
           <Textarea id="content" title="내용" ref={contentRef} />
           <Input

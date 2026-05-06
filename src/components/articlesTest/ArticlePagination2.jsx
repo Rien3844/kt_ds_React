@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { articleAction } from "../../stores/toolkit/slices/articleSlice";
+import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
 
 const ArticlePagination = () => {
   const reactReduxDispatcher = useDispatch();

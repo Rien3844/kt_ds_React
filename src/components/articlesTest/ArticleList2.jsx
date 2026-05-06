@@ -1,12 +1,4 @@
-/** @format */
-
-import { useSelector } from "react-redux";
-
-const ArticleList = () => {
-  console.log("ArticleList");
-
-  const { list: contents } = useSelector((store) => store.article);
-
+const ArticleList = ({ contents }) => {
   return (
     <tbody>
       {contents.map((article) => (
@@ -23,5 +15,4 @@ const ArticleList = () => {
     </tbody>
   );
 };
-
 export default ArticleList;

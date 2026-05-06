@@ -1,4 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { fetchLogin, fetchMyInfo } from "../../../http/articles/fetchLogin";
+import { isString } from "../../../utils/type";
+import { getValidationResult } from "../../../utils/errorHandler";
 
 // ReduxToolkit slice store 생성.
 export const userSlice = createSlice({
@@ -6,6 +9,7 @@ export const userSlice = createSlice({
   initialState: {
     token: null,
     info: null,
+    error: null,
   },
   reducers: {
     logout(store) {
@@ -24,8 +28,55 @@ export const userSlice = createSlice({
     },
     login(store, action) {
       store.token = action.payload;
+      store.error = null;
+    },
+    error(store, action) {
+      if (isString(action.payload)) {
+        store.error = action.payload;
+      } else {
+        store.error = getValidationResult(action.payload);
+      }
     },
   },
 });
 
 export const userAction = userSlice.actions;
+
+// toolkit slice store에 대한 custom action(reducer) ==> fetch + dispatch 생성
+export const userThunks = {
+  login(email, password) {
+    // useDispatch()의 결과가 파라미터로 전달.
+    return async (dispatcher) => {
+      // fetch
+      const loginResult = await fetchLogin(email, password);
+      //dispatch
+      if (!loginResult.error) {
+        sessionStorage.setItem("token", loginResult.token);
+        dispatcher(userAction.login(loginResult.token));
+      } else {
+        dispatcher(userAction.error(loginResult.error));
+      }
+    };
+  },
+  loadMyInfo() {
+    return async (dispatcher) => {
+      const sessionToken = sessionStorage.getItem("token");
+      const myInfo = await fetchMyInfo(sessionToken);
+
+      if (myInfo.error) {
+        // token이 변조되었거나 만료기간이 도래한 경우.
+        sessionStorage.removeItem("token");
+        // slice store도 제거.
+        dispatcher(userAction.logout());
+      } else {
+        dispatcher(userAction.loadMyInfo(myInfo));
+      }
+    };
+  },
+  logout() {
+    return async (dispatcher) => {
+      sessionStorage.removeItem("token");
+      dispatcher(userAction.logout());
+    };
+  },
+};

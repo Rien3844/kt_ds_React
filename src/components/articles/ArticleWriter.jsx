@@ -3,13 +3,8 @@
 import { useRef, useState } from "react";
 import { Alert } from "../ui/Modal.jsx";
 import { isString } from "../../utils/type.js";
-import { getValidationResult } from "../../utils/errorHandler.js";
-import {
-  fetchAddArticle,
-  fetchArticleList,
-} from "../../http/articles/fetchArticles";
 import { useDispatch, useSelector } from "react-redux";
-import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
+import { articleThunks } from "../../stores/toolkit/slices/articleSlice.js";
 
 const Input = ({ id, title, type = "text", ref, ...props }) => {
   console.log("Input");
@@ -34,9 +29,12 @@ const Textarea = ({ id, title, ref, ...props }) => {
 const ArticleWriter = () => {
   console.log("ArticleWriter");
 
+  const {
+    error: { write: addError },
+  } = useSelector((store) => store.article);
+
   const { token } = useSelector((store) => store.user);
 
-  const [addError, setAddError] = useState();
   const [viewMode, setViewMode] = useState("button");
 
   const subjectRef = useRef();
@@ -64,27 +62,13 @@ const ArticleWriter = () => {
       return;
     }
 
-    const addResult = await fetchAddArticle(
-      token,
-      subjectRef.current.value,
-      contentRef.current.value,
-      attachFileRef.current.files,
+    toolkitDispatcher(
+      articleThunks.write(
+        subjectRef.current.value,
+        contentRef.current.value,
+        attachFileRef.current.files,
+      ),
     );
-
-    if (addResult.error) {
-      if (isString(addResult.error)) {
-        setAddError(addResult.error);
-      } else {
-        setAddError(getValidationResult(addResult.error));
-      }
-    }
-
-    const fetchResult = await fetchArticleList();
-    const {
-      result: { count, result },
-      pagination,
-    } = fetchResult;
-    toolkitDispatcher(articleAction.refresh({ count, result, pagination }));
 
     subjectRef.current.value = "";
     contentRef.current.value = "";

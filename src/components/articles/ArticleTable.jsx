@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { articleAction } from "../../stores/toolkit/slices/articleSlice.js";
-import { fetchArticleList } from "../../http/articles/fetchArticles.js";
+import { articleThunks } from "../../stores/toolkit/slices/articleSlice.js";
 
 const ArticleTable = ({ children }) => {
   const [viewPageNo, setViewPageNo] = useState(0);
@@ -14,26 +13,17 @@ const ArticleTable = ({ children }) => {
 
   const {
     pagination: { pageNo = 0, pageCount = 0 },
+    error: { list },
   } = useSelector((store) => store.article);
+
+  if (list) {
+    alert(list);
+  }
 
   const toolkitDispathcer = useDispatch();
 
-  const refreshArticleList = async () => {
-    const articleList = await fetchArticleList(viewPageNo);
-    const {
-      result: { count, result },
-      pagination,
-    } = articleList;
-
-    toolkitDispathcer(articleAction.refresh({ count, result, pagination }));
-
-    if (articleList.error) {
-      alert(articleList.error);
-    }
-  };
-
   useEffect(() => {
-    refreshArticleList();
+    toolkitDispathcer(articleThunks.refresh(viewPageNo));
   }, [viewPageNo]);
 
   return (
